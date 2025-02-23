@@ -22,3 +22,11 @@ If referencing these archival notebooks, please cite the original research paper
   publisher = {AI and Ethics},
   howpublished = {\url{https://doi.org/10.1007/s43681-021-00095-8}}
 }
+
+@misc{Goldsteen2022GitHubRepo,
+  author = {Abigail Goldsteen and Gilad Ezov and Ron Shmelkin and Micha Moffie and Ariel Farkash},
+  title = {SOFTX-D-22-00422},
+  year = {2022},
+  publisher = {GitHub},
+  howpublished = {\url{https://github.com/ElsevierSoftwareX/SOFTX-D-22-00422}}
+}
