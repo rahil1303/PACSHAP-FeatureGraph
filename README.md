@@ -26,3 +26,13 @@ The repository includes implementations, experiments, and visualizations (includ
 
 **📂 Repository Structure:**
 
+
+**✉️ Contact:**
+
+For questions or collaboration, please contact:
+
+- **Your Name:** [your.email@example.com](mailto:your.email@example.com)
+
+---
+
+🌟 **Thank you for exploring PACSHAP-FeatureGraph!** 🌟
