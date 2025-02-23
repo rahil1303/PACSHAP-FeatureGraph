@@ -19,6 +19,7 @@ The goal of these modified notebooks is to revive the original implementation, e
 ### 📜 Citation
 If referencing these modified notebooks, please cite the original research paper. 
 
+```bibtex
 @misc{Goldsteen2022DataMinimization,
   author = {Abigail Goldsteen and Gilad Ezov and Ron Shmelkin and Micha Moffie and Ariel Farkash},
   title = {Data minimization for GDPR compliance in machine learning models},
