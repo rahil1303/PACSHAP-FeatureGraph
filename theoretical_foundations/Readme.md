@@ -69,39 +69,38 @@ Our implementation explicitly utilizes PAC Privacy to achieve robust theoretical
 
 ### 📐 Mathematical Foundations of Privacy-Utility Tradeoff
 
-#### **PAC Privacy and Leakage Bounds**
+### PAC Privacy and Leakage Bounds
 
-PAC Privacy ensures that, with high probability (1 - δ), the privacy leakage L(D) remains bounded. The key inequality used is:
+PAC Privacy ensures that, with high probability \((1 - \delta)\), the privacy leakage \(L(D)\) remains bounded. The key inequality used is:
 
-\[
-\mathbb{P}[L(D) \leq \epsilon] \geq 1 - \delta
-\]
+```math
+\mathbb{P}\left[L(D) \leq \epsilon\right] \geq 1 - \delta
+```
 
 where:
 
 - \( L(D) \) is the observed privacy leakage in dataset \(D\),
-- \( D \) is the perturbed dataset,
 - \( \epsilon \) is the privacy budget,
 - \( \delta \) is the probability of failure.
 
-#### **Explicit Example Comparing DP and PAC Privacy**
+### Explicit Example Comparing DP and PAC Privacy
 
-In the original research paper, a high privacy budget \(\epsilon\) was chosen (e.g., \(\epsilon=10\)), resulting in excessive noise addition and a utility (accuracy) drop of about 5-7%. Our PAC Privacy approach explicitly calculates the required privacy leakage bound (\(\epsilon\)) ensuring privacy protection while limiting the accuracy loss to less than 2%, significantly improving the trade-off.
+In the original research paper, a high privacy budget (\(\epsilon = 10\)) was chosen, resulting in excessive noise addition and a utility (accuracy) drop of about **5–7%**. Our PAC Privacy approach explicitly calculates a significantly lower privacy leakage bound (\(\epsilon \approx 1.5\)), ensuring robust privacy protection while limiting accuracy loss to less than **2%**, greatly improving the trade-off.
 
-#### **Privacy-Utility Tradeoff in Our Approach**
+### Privacy-Utility Tradeoff in Our Approach
 
-Traditional DP techniques suffer from excessive accuracy loss due to indiscriminate noise addition across all numerical features. For instance, the Adult dataset includes 6 numerical features; DP application to all numeric features unnecessarily degraded performance. Our hybrid approach, employing Knowledge Graphs and SHAP, selectively identifies the most relevant features (e.g., reducing from 14 total features to approximately 7 relevant features), leading to enhanced accuracy and robustness:
+Traditional DP techniques suffer from excessive accuracy loss due to indiscriminate noise addition across all numerical features. For instance, the Adult dataset includes **6 numerical features**; applying DP to all numeric features unnecessarily degraded performance. Our hybrid approach, using Knowledge Graphs and SHAP, selectively identifies the most relevant features (reducing from **14 total features to approximately 7 relevant features**), leading to improved accuracy and robustness:
 
-\[
-U_{hybrid} = U_{baseline} - (\alpha \cdot L_{privacy}) + \beta
-\]
+```math
+U_{\text{hybrid}} = U_{\text{baseline}} - (\alpha \cdot L_{\text{privacy}}) + \beta
+```
 
 where:
 
-- \( U_{hybrid} \) is the utility in our hybrid approach,
-- \( U_{baseline} \) is the baseline model utility,
-- \( L_{privacy} \) is the privacy loss factor,
-- \( \alpha, \beta \) quantify the impact of removing irrelevant features.
+- \( U_{\text{hybrid}} \) is the utility in our hybrid approach,
+- \( U_{\text{baseline}} \) is the baseline model utility,
+- \( L_{\text{privacy}} \) is the privacy loss factor,
+- \( \alpha, \beta \) quantify the impact and benefit of selecting relevant features.
 
 Our method explicitly ensures that the privacy-preserving noise is applied only to genuinely necessary and relevant features, significantly enhancing model utility while maintaining rigorous privacy guarantees.
 
