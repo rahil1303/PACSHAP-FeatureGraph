@@ -21,7 +21,7 @@ We explored logical privacy-preserving strategies to mitigate two critical types
 
 This graph clearly illustrates how our **Hybrid Method** achieves the best balance between model accuracy and protection against inference attacks.
 
-![Privacy-Utility Trade-off](image.png)
+![Privacy-Utility Trade-off](image1.png)
 
 - **Hybrid Method** achieved the highest predictive accuracy (**88%**) and the lowest inference attack accuracy (**58%**), clearly outperforming DP and Anonymization methods individually.
 
@@ -29,7 +29,7 @@ This graph clearly illustrates how our **Hybrid Method** achieves the best balan
 
 ROC curves provide a detailed view of each method's performance against inference attacks:
 
-![ROC Curve for Inference Attacks](image.png)
+![ROC Curve for Inference Attacks](image2.png)
 
 - The **Hybrid Method** clearly offers the lowest ROC-AUC (**0.57**), indicating superior privacy protection compared to Differential Privacy (**0.73**) and Anonymization (**0.67**).
 
