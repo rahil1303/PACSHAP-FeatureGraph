@@ -84,6 +84,41 @@ The repository includes implementations, experiments, and visualizations (includ
 
 **📂 Repository Structure:**
 
+•	Case_Study: Detailed examinations and real-world scenarios illustrating our solution's practical effectiveness.
+•	Logic_Experiment: Q&A formatted justifications for critical design decisions and explicit explanations on why our approach effectively addresses identified gaps.
+•	Proposed_Method_Implementation: Contains clearly annotated code implementations and experiments demonstrating our approach and empirical validations against privacy attacks.
+•	Theoretical_Foundations: Comprehensive theoretical and mathematical justifications for our selected methodologies, explicitly highlighting improvements over the original paper.
+•	Archived_Notebooks This folder contains reference notebooks from the original research implementation associated with the paper "Data minimization for GDPR compliance in machine learning models" by Goldsteen et al. (2022).
+•	modified_archived_notebooks: This folder contains notebooks adapted and modified from the original archived reference notebooks associated with the research paper titled "Data minimization for GDPR compliance in machine learning models" by Goldsteen et al. (2022). The original implementation and datasets became outdated and incompatible with current library versions and dependencies.
+![image](https://github.com/user-attachments/assets/537a68cd-b5b3-44a6-a41b-7781a2b974e8)
+
+
+## 📚 References & Citations
+
+- **Goldsteen, et al. (2022)**.  
+  *"Data Minimization for GDPR Compliance in Machine Learning Models"*  
+  IEEE Symposium on Security and Privacy (SP), 2022.
+
+- **Mienye, Ibomoiye Domor, and Yanxia Sun (2023)**.  
+  *"A Machine Learning Method with Hybrid Feature Selection for Improved Credit Card Fraud Detection"*  
+  Applied Sciences 13, no. 12: 7254. [https://doi.org/10.3390/app13127254](https://doi.org/10.3390/app13127254)
+
+- **Goldwasser, Shafi, Michael P. Kim, Vinod Vaikuntanathan, and Or Zamir (2022)**.  
+  *"Planting Undetectable Backdoors in Machine Learning Models"*  
+  IEEE Symposium on Foundations of Computer Science (FOCS), 2022.
+
+- **Rubenstein, Paul, Peter Bartlett, and Thomas Steinke (2022)**.  
+  *"PAC Privacy: Automatic Privacy Measurement and Control of Data Processing"*  
+  Advances in Neural Information Processing Systems (NeurIPS), 2022.
+
+- **Pulls, Tobias, and Mike Perry (2020)**.  
+  *"Raising the Bar: Improved Fingerprinting Attacks and Defenses for Video Streaming Traffic"*  
+  USENIX Security Symposium, 2020.
+
+- **Shokri, Reza, Marco Stronati, Congzheng Song, and Vitaly Shmatikov (2017)**.  
+  *"Membership Inference Attacks against Machine Learning Models"*  
+  IEEE Symposium on Security and Privacy (Oakland), 2017.
+
 
 **✉️ Contact:**
 
