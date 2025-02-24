@@ -71,7 +71,9 @@ Our implementation explicitly utilizes PAC Privacy to achieve robust theoretical
 
 ### PAC Privacy and Leakage Bounds
 
-PAC Privacy ensures that, with high probability \((1 - \delta)\), the privacy leakage \(L(D)\) remains bounded. The key inequality used is:
+Mathematical Foundations of Privacy-Utility Tradeoff
+
+PAC Privacy ensures that, with high probability \((1 - \delta)\), the privacy leakage \(L(D)\) remains bounded. The key inequality is:
 
 ```math
 \mathbb{P}\left[L(D) \leq \epsilon\right] \geq 1 - \delta
@@ -79,17 +81,25 @@ PAC Privacy ensures that, with high probability \((1 - \delta)\), the privacy le
 
 where:
 
-- \( L(D) \) is the observed privacy leakage in dataset \(D\),
-- \( \epsilon \) is the privacy budget,
+- \( L(D) \) is the observed privacy leakage in dataset \(D\).
+- \( \epsilon \) is the privacy budget.
 - \( \delta \) is the probability of failure.
 
-### Explicit Example Comparing DP and PAC Privacy
+---
 
-In the original research paper, a high privacy budget (\(\epsilon = 10\)) was chosen, resulting in excessive noise addition and a utility (accuracy) drop of about **5–7%**. Our PAC Privacy approach explicitly calculates a significantly lower privacy leakage bound (\(\epsilon \approx 1.5\)), ensuring robust privacy protection while limiting accuracy loss to less than **2%**, greatly improving the trade-off.
+#### Explicit Example Comparing DP and PAC Privacy
 
-### Privacy-Utility Tradeoff in Our Approach
+In the original research paper, a high privacy budget (e.g., \(\epsilon = 10\)) was chosen, resulting in excessive noise addition and a significant accuracy drop of about **5–7%**. 
 
-Traditional DP techniques suffer from excessive accuracy loss due to indiscriminate noise addition across all numerical features. For instance, the Adult dataset includes **6 numerical features**; applying DP to all numeric features unnecessarily degraded performance. Our hybrid approach, using Knowledge Graphs and SHAP, selectively identifies the most relevant features (reducing from **14 total features to approximately 7 relevant features**), leading to improved accuracy and robustness:
+Our PAC Privacy approach explicitly computes a substantially lower privacy leakage bound (approximately \(\epsilon \approx 1.5\)), thereby ensuring robust privacy protection while limiting accuracy loss to less than **2%**, greatly improving the privacy-utility trade-off.
+
+---
+
+#### Privacy-Utility Tradeoff in Our Approach
+
+Traditional DP techniques suffer from excessive accuracy loss due to indiscriminate noise addition across all numerical features. For instance, the Adult dataset contains **6 numerical features**, and applying DP to all numeric features unnecessarily degraded performance.
+
+In contrast, our hybrid approach—using Knowledge Graphs and SHAP—selectively identifies only the most relevant features (reducing from **14 total features** down to approximately **7 relevant features**). This targeted selection significantly enhances accuracy and robustness, as formalized by:
 
 ```math
 U_{\text{hybrid}} = U_{\text{baseline}} - (\alpha \cdot L_{\text{privacy}}) + \beta
@@ -97,12 +107,12 @@ U_{\text{hybrid}} = U_{\text{baseline}} - (\alpha \cdot L_{\text{privacy}}) + \b
 
 where:
 
-- \( U_{\text{hybrid}} \) is the utility in our hybrid approach,
-- \( U_{\text{baseline}} \) is the baseline model utility,
-- \( L_{\text{privacy}} \) is the privacy loss factor,
-- \( \alpha, \beta \) quantify the impact and benefit of selecting relevant features.
+- \(U_{\text{hybrid}}\) is the achieved utility of our hybrid approach.
+- \(U_{\text{baseline}}\) represents the baseline model utility.
+- \(L_{\text{privacy}}\) denotes the privacy loss factor introduced by noise.
+- Parameters \(\alpha\) and \(\beta\) quantify, respectively, the trade-off between privacy and utility, and the explicit gain from feature relevance optimization.
 
-Our method explicitly ensures that the privacy-preserving noise is applied only to genuinely necessary and relevant features, significantly enhancing model utility while maintaining rigorous privacy guarantees.
+Our method ensures explicitly that privacy-preserving noise is added only to genuinely necessary and relevant features, thereby significantly enhancing model utility while maintaining rigorous and explicit privacy guarantees.
 
 ### 📉 Empirical Comparison & Validation
 
