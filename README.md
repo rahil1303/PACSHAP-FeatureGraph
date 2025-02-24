@@ -10,45 +10,46 @@ The authors of the cited paper propose data generalization at model inference to
 
 We identified several critical weaknesses in the cited paper ([Goldsteen et al., 2022](https://doi.org/10.1016/j.cose.2022.102808)) that our project addresses:
 
-### 🚩 Weakness 1: Reliance on Decision Trees for Feature Generalization
-
-- **Issue:** Their method heavily relies on decision trees, assuming they effectively capture model decision boundaries. However, decision trees only make axis-aligned splits, potentially missing subtle and complex feature interactions, especially in deep learning scenarios.  
-- **Our Counterpoint:** Instead of decision trees, we employ a Knowledge Graph and SHAP-driven interpretability to capture complex and context-aware feature relationships accurately.
-
-### 🚩 Weakness 2: User-Driven Dynamic Feature Reduction
-
-- **Issue:** Their approach relies on users gradually disclosing data, making it manual and less practical for automated, large-scale real-world ML pipelines.  
-- **Our Counterpoint:** Our feature selection method automates this process, proactively identifying and filtering unnecessary data before it reaches ML pipelines, enhancing scalability and reliability.
-
-### 🚩 Weakness 3: Feature Contamination Across Multiple Models
-
-- **Issue:** They assume minimizing data in a single model achieves compliance, neglecting cross-model data reuse (loan approvals, fraud detection, marketing), potentially causing privacy leakage.  
-- **Our Counterpoint:** We propose a pre-check system to ensure that only genuinely necessary features enter multiple ML models, effectively preventing cross-model feature contamination.
-
-### 🚩 Weakness 4: Lack of Security Assurance
-
-- **Issue:** They assert that reducing data collection improves security but do not evaluate resistance against adversarial scenarios (e.g., feature inversion attacks).  
-- **Our Counterpoint:** Our approach emphasizes proactive security by eliminating unnecessary data at the outset, significantly reducing potential adversarial misuse.
-
-### 🚩 Weakness 5: All Data Directly Fed Into ML Models
+### 🚩 Weakness 1: All Data Directly Fed Into ML Models
 
 - **Issue:** Feeding all data directly into ML models poses significant privacy risks, including susceptibility to undetectable backdoors, increasingly prevalent in modern ML attacks.  
 - **Our Counterpoint:** Our method proactively analyzes and selects only the necessary features, significantly reducing privacy risks by limiting unnecessary data exposure.
 
-### 🚩 Weakness 6: Exclusive Handling of Numerical Features
+### 🚩 Weakness 2: Exclusive Handling of Numerical Features
 
 - **Issue:** Their minimization and generalization techniques exclusively handle numerical features, neglecting categorical (string) data, which limits the approach’s applicability to comprehensive ML scenarios.  
 - **Our Counterpoint:** We address both numerical and categorical features, enabling broader and more effective feature selection and minimization.
 
-### 🚩 Weakness 7: Accuracy Loss with Differential Privacy
+### 🚩 Weakness 3: Accuracy Loss with Differential Privacy
 
 - **Issue:** Their differential privacy implementation often sacrifices accuracy, particularly noticeable during data generalization and minimization phases. Additionally, their implementation uses outdated libraries, requiring substantial rewriting.  
 - **Our Counterpoint:** We adopt PAC Privacy, ensuring stronger theoretical privacy guarantees without significant accuracy degradation.
 
-### 🚩 Weakness 8: Decision Tree Limitations
+### 🚩 Weakness 4: Decision Tree Limitations
 
 - **Issue:** Their reliance on decision trees limits their methodology’s ability to generalize complex feature interactions.  
 - **Our Counterpoint:** We propose alternative methods involving Knowledge Graphs and SHAP values to offer improved, more accurate assessments of feature importance and interactions.
+
+
+### 🚩 Weakness 5: Reliance on Decision Trees for Feature Generalization
+
+- **Issue:** Their method heavily relies on decision trees, assuming they effectively capture model decision boundaries. However, decision trees only make axis-aligned splits, potentially missing subtle and complex feature interactions, especially in deep learning scenarios.  
+- **Our Counterpoint:** Instead of decision trees, we employ a Knowledge Graph and SHAP-driven interpretability to capture complex and context-aware feature relationships accurately.
+
+### 🚩 Weakness 6: User-Driven Dynamic Feature Reduction
+
+- **Issue:** Their approach relies on users gradually disclosing data, making it manual and less practical for automated, large-scale real-world ML pipelines.  
+- **Our Counterpoint:** Our feature selection method automates this process, proactively identifying and filtering unnecessary data before it reaches ML pipelines, enhancing scalability and reliability.
+
+### 🚩 Weakness 7: Feature Contamination Across Multiple Models
+
+- **Issue:** They assume minimizing data in a single model achieves compliance, neglecting cross-model data reuse (loan approvals, fraud detection, marketing), potentially causing privacy leakage.  
+- **Our Counterpoint:** We propose a pre-check system to ensure that only genuinely necessary features enter multiple ML models, effectively preventing cross-model feature contamination.
+
+### 🚩 Weakness 8: Lack of Security Assurance
+
+- **Issue:** They assert that reducing data collection improves security but do not evaluate resistance against adversarial scenarios (e.g., feature inversion attacks).  
+- **Our Counterpoint:** Our approach emphasizes proactive security by eliminating unnecessary data at the outset, significantly reducing potential adversarial misuse.
 
 ---
 
