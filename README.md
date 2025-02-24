@@ -60,14 +60,21 @@ We critique and substantially improve upon this by:
 - **Introducing Knowledge Graphs (KG)** to accurately identify and validate feature relevance before data reaches ML pipelines.
 - **Utilizing SHAP (SHapley Additive exPlanations)** values to achieve explainable, context-aware feature importance assessment.
 - **Integrating PAC (Probably Approximately Correct) Privacy**, offering strong theoretical guarantees that selected features are both privacy-preserving and statistically sound.
+- **Leveraging Autoencoders** to intelligently encode and reconstruct features, identifying critical feature dependencies and redundancies, thus further enhancing feature selection and ensuring minimal data exposure.
 
-Unlike entropy-based or generalized data approaches, our methodology ensures that only genuinely necessary features are selected, significantly reducing the privacy risks associated with ML models. This project demonstrates empirical improvements in privacy-accuracy trade-offs, providing a robust framework for real-world, large-scale applications in data protection and privacy-sensitive machine learning.
+Unlike entropy-based or generalized data approaches, our methodology ensures that only genuinely necessary features are selected, significantly reducing the privacy risks associated with ML models. Autoencoders provide an additional layer of intelligent feature reduction, capturing complex relationships while maintaining model accuracy. This project demonstrates empirical improvements in privacy-accuracy trade-offs, providing a robust framework for real-world, large-scale applications in data protection and privacy-sensitive machine learning.
 
 ## 🗃️ Key Contributions:
 
-- **Federated KG-driven feature relevance checks** ensuring automated data minimization across multiple ML models.
-- **SHAP-driven interpretability** providing transparent and explainable feature selection.
+- **Federated KG-driven feature relevance checks**, ensuring automated data minimization across multiple ML models.
+- **SHAP-driven interpretability**, providing transparent and explainable feature selection.
 - **PAC Privacy guarantees**, ensuring rigorous compliance with GDPR and privacy standards.
+- **Autoencoder-based feature encoding**, intelligently identifying redundant and dependent features, thereby enhancing privacy-preserving feature selection.
+
+---
+
+For an in-depth critique and detailed logical reasoning behind our approach, please refer to the **[`Logic_Behind`](./Logic_Behind)** folder in this repository.
+
 
 ## 🔗 Usage:
 
