@@ -2,102 +2,117 @@
 
 ### 📌 Introduction & Problem Statement
 
-The research paper ["Data Minimization for GDPR Compliance in Machine Learning Models"](https://doi.org/10.1016/j.cose.2022.102808) (Goldsteen et al., 2022) proposes data generalization methods at inference time to comply with GDPR's data minimization requirements. While insightful, we identified several critical weaknesses limiting their approach’s effectiveness, applicability, and robustness.
+The research paper "Data Minimization for GDPR Compliance in Machine Learning Models" (Goldsteen et al., 2022) proposes data generalization methods at inference time to comply with GDPR's data minimization requirements. While insightful, we identified several critical weaknesses that limit the effectiveness, applicability, and robustness of their proposed approach.
 
-## 🔍 Critique of Existing Methods
+### 🔍 Critique of Existing Methods
 
-We explicitly address key weaknesses in Goldsteen et al.'s (2022) approach:
+We explicitly identify and address the following key weaknesses in Goldsteen et al.'s (2022) approach:
 
-### ⚠️ Direct Input of All Data into Models
-- Risk of privacy violations, including susceptibility to undetectable backdoor attacks.
+- **Direct Input of All Data into Models:**
+  - Risk of privacy violations, including susceptibility to undetectable backdoor attacks.
 
-### ⚠️ Limited Handling of Numerical Features
-- Ignores categorical features, reducing real-world applicability.
+- **Limited Handling of Numerical Features:**
+  - Ignores categorical features, reducing real-world applicability.
 
-### ⚠️ Accuracy Trade-offs with Differential Privacy
-- Significant accuracy degradation occurs with differential privacy (DP).
+- **Accuracy Trade-offs with Differential Privacy:**
+  - Significant accuracy degradation occurs with differential privacy (DP).
 
-### ⚠️ Decision Tree Limitations
-- Axis-aligned splits restrict capturing complex interactions.
+- **Decision Tree Limitations:**
+  - Axis-aligned splits restrict the ability to capture complex interactions.
 
-### ⚠️ Over-Reliance on Decision Trees for Feature Generalization
-- Decision trees alone miss subtle, complex feature interactions.
+- **Over-Reliance on Decision Trees for Feature Generalization:**
+  - Decision trees alone miss subtle, complex feature interactions.
 
-### ⚠️ Manual, User-Driven Feature Reduction
-- Lacks automation and scalability in large-scale settings.
+- **Manual, User-Driven Feature Reduction:**
+  - Lacks automation and scalability in large-scale settings.
 
-### ⚠️ Cross-Model Feature Contamination
-- Neglects the risk posed by feature reuse across different ML models.
+- **Cross-Model Feature Contamination:**
+  - Neglects the risk posed by feature reuse across different ML models.
 
-### ⚠️ Absence of Robust Security Assurance
-- Privacy claims not validated explicitly against adversarial scenarios.
+- **Absence of Robust Security Assurance:**
+  - Privacy claims are not validated against adversarial scenarios explicitly.
 
-## 🎯 Theoretical Justifications of Our Approach
+### 🎯 Theoretical Justifications of Our Approach
 
-### 📖 SHAP (SHapley Additive exPlanations)
-SHAP values derive from cooperative game theory, providing interpretable, theoretically grounded feature importance scores. Unlike decision trees, SHAP captures non-linear relationships, explicitly overcoming weaknesses 4 and 5 by nuanced evaluations generalizing across models.
+#### **SHAP (SHapley Additive exPlanations)**
 
-### 🌐 Knowledge Graph (KG) Approach
-KGs explicitly represent relational structures among features and outcomes. They effectively address weaknesses 4, 5, and 7 by identifying relevant features with meaningful correlations to the target variable, improving privacy and interpretability.
+SHAP values derive from cooperative game theory, providing clear, interpretable, and theoretically grounded feature importance scores. Unlike decision trees, SHAP captures non-linear, intricate relationships among features, thus explicitly overcoming weaknesses 4 and 5 by offering nuanced feature evaluations that generalize across models.
 
-### 🔄 Hybrid Approach (KG & SHAP Intersection/Union)
-Our hybrid method combines SHAP and KG analyses:
+#### **Knowledge Graph (KG) Approach**
 
-- **Intersection** ensures only consistently important features are selected.
-- **Union** adds flexibility for identifying critical features, explicitly addressing weaknesses 1, 4, 5, and 6.
+Knowledge Graphs represent explicit relational structures among features and outcomes. Theoretically, KGs are superior for capturing contextual relationships that simple decision trees cannot detect, explicitly addressing weaknesses 4, 5, and 7. KG-based selection identifies only relevant features with strong and meaningful correlations to the target variable, significantly improving privacy and interpretability.
 
-### 🧩 Autoencoders for Privacy Preservation
-Autoencoders capture and reconstruct data in compressed latent spaces, identifying essential data dimensions. Combined with adversarial training, autoencoders explicitly reduce sensitive attribute leakage, addressing weaknesses 1, 3, 6, 7, and 8 by systematically eliminating unnecessary data and enhancing privacy.
+#### **Hybrid Approach (KG & SHAP Intersection/Union)**
 
-### 🔐 PAC (Probably Approximately Correct) Privacy
-PAC Privacy explicitly provides theoretical privacy guarantees with clear probabilistic bounds, offering:
+Our hybrid methodology explicitly combines SHAP values and Knowledge Graph analyses to create robust feature selection criteria:
 
-- Stronger guarantees with rigorous theoretical privacy leakage bounds.
-- Minimizes accuracy loss compared to traditional DP methods, explicitly addressing weakness 3.
+- **Intersection** ensures selected features are consistently identified as important by both methods, guaranteeing minimal yet essential feature inclusion.
+- **Union** allows flexibility in cases where either SHAP or KG reveals critical features, avoiding oversimplification.
 
-## 🧮 Mathematical Foundations of Privacy-Utility Tradeoff
+This explicitly addresses weaknesses 1, 4, 5, and 6 by automating and refining feature selection proactively and scalably.
 
-### 📊 PAC Privacy and Leakage Bounds
-PAC Privacy ensures privacy leakage \( L(D) \) remains bounded with high probability:
+#### **Autoencoders for Privacy Preservation**
+
+Autoencoders theoretically capture and reconstruct input data in compressed latent spaces, effectively identifying and preserving only the essential data dimensions. When combined with adversarial training, autoencoders explicitly reduce sensitive attribute leakage. This method:
+
+- Mitigates risks associated with directly feeding sensitive features into models.
+- Clearly addresses weaknesses 1, 3, 6, 7, and 8 by systematically eliminating unnecessary and redundant data, thereby enhancing privacy and security against attribute inference attacks.
+
+#### **PAC (Probably Approximately Correct) Privacy**
+
+PAC Privacy provides explicit theoretical bounds and privacy guarantees through probabilistic measures. Unlike DP, PAC Privacy:
+
+- Delivers stronger, rigorous guarantees with clear theoretical bounds on privacy leakage.
+- Minimizes accuracy loss compared to traditional DP methods.
+
+Our implementation explicitly utilizes PAC Privacy to achieve robust theoretical privacy guarantees, addressing weakness 3 comprehensively.
+
+### 📐 Mathematical Foundations of Privacy-Utility Tradeoff
+
+#### **PAC Privacy and Leakage Bounds**
+
+PAC Privacy ensures that, with high probability (1 - δ), the privacy leakage L(D) remains bounded. The key inequality used is:
 
 \[
 \mathbb{P}[L(D) \leq \epsilon] \geq 1 - \delta
 \]
 
-- \(L(D)\): Privacy leakage observed.
-- \(\epsilon\): Privacy budget.
-- \(\delta\): Probability of failure.
+where:
 
-### 🔖 Explicit Example Comparing DP and PAC Privacy
-Goldsteen et al. use high \(\epsilon\) (e.g., \(\epsilon=10\)), resulting in 5-7% accuracy drops. Our PAC Privacy explicitly calculates bounds ensuring privacy while limiting accuracy loss (<2%), significantly improving this trade-off.
+- \( L(D) \) is the observed privacy leakage in dataset \(D\),
+- \( D \) is the perturbed dataset,
+- \( \epsilon \) is the privacy budget,
+- \( \delta \) is the probability of failure.
 
-### 📈 Privacy-Utility Tradeoff in Our Approach
-DP degrades accuracy by indiscriminate noise addition. Our hybrid approach (KG & SHAP) selects the most relevant features (e.g., from 14 down to ~7 relevant features), enhancing accuracy:
+#### **Explicit Example Comparing DP and PAC Privacy**
+
+In the original research paper, a high privacy budget \(\epsilon\) was chosen (e.g., \(\epsilon=10\)), resulting in excessive noise addition and a utility (accuracy) drop of about 5-7%. Our PAC Privacy approach explicitly calculates the required privacy leakage bound (\(\epsilon\)) ensuring privacy protection while limiting the accuracy loss to less than 2%, significantly improving the trade-off.
+
+#### **Privacy-Utility Tradeoff in Our Approach**
+
+Traditional DP techniques suffer from excessive accuracy loss due to indiscriminate noise addition across all numerical features. For instance, the Adult dataset includes 6 numerical features; DP application to all numeric features unnecessarily degraded performance. Our hybrid approach, employing Knowledge Graphs and SHAP, selectively identifies the most relevant features (e.g., reducing from 14 total features to approximately 7 relevant features), leading to enhanced accuracy and robustness:
 
 \[
 U_{hybrid} = U_{baseline} - (\alpha \cdot L_{privacy}) + \beta
 \]
 
-- \(U_{hybrid}\): Hybrid approach utility.
-- \(U_{baseline}\): Baseline model utility.
-- \(L_{privacy}\): Privacy loss factor.
-- \(\alpha, \beta\): Impact of removing irrelevant features.
+where:
 
-Our method explicitly ensures privacy-preserving noise applies only to necessary features, significantly improving utility.
+- \( U_{hybrid} \) is the utility in our hybrid approach,
+- \( U_{baseline} \) is the baseline model utility,
+- \( L_{privacy} \) is the privacy loss factor,
+- \( \alpha, \beta \) quantify the impact of removing irrelevant features.
 
-## 📉 Empirical Comparison & Validation
+Our method explicitly ensures that the privacy-preserving noise is applied only to genuinely necessary and relevant features, significantly enhancing model utility while maintaining rigorous privacy guarantees.
 
-Empirical validation (Adult, Nursery datasets) explicitly shows our hybrid method:
+### 📉 Empirical Comparison & Validation
 
-- Maintained predictive accuracy comparable to baselines.
-- Reduced vulnerability to Membership and Attribute Inference attacks.
-- PAC privacy leakage evaluation yielded ~15% leakage bound, validating theoretical predictions.
+Empirical validation across the Adult and Nursery datasets explicitly demonstrates our hybrid method's effectiveness:
 
-## ✅ Summary of Improvements & Contributions
+- Maintained predictive accuracy comparable to baseline methods.
+- Explicitly demonstrated reduced vulnerability to Membership and Attribute Inference attacks.
+- Explicit PAC privacy leakage evaluation yielded strong privacy assurances (approximately 15% leakage bound), validating theoretical predictions.
 
-Our theoretically justified, empirically validated hybrid approach explicitly counters identified weaknesses. Integrating SHAP interpretability, KG-driven analysis, autoencoder privacy embedding, and rigorous PAC Privacy guarantees establishes a robust, scalable framework for privacy-preserving, GDPR-compliant machine learning.
+### ✅ Summary of Improvements & Contributions
 
----
-
-For an in-depth critique and detailed logical reasoning behind our approach, please refer to the **[`Logic_Behind`](./Logic_Behind)** folder in this repository.
-
+Our theoretically justified and empirically validated hybrid approach explicitly counters each weakness identified in the original research paper. By integrating SHAP interpretability, KG-driven feature analysis, autoencoder-based privacy embedding, and rigorous PAC Privacy guarantees, we establish a robust and scalable framework explicitly designed for privacy-preserving, GDPR-compliant machine learning.
