@@ -13,7 +13,7 @@ We explored logical privacy-preserving strategies to mitigate two critical types
 
 - **Differential Privacy (DP)**: Noise-based protection.
 - **Anonymization**: Generalization-based protection.
-- **Hybrid Method (Our Proposed Approach)**: Combines DP and Anonymization.
+- **Hybrid Method (Our Proposed Approach)**: Proposes KG+SHAP+Autoencoders+PAC.
 
 ## Experimental Results
 
