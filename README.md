@@ -31,7 +31,7 @@ The repository includes implementations, experiments, and visualizations (includ
 
 For questions or collaboration, please contact:
 
-- **Your Name:** [your.email@example.com](mailto:your.email@example.com)
+- **Your Name:** [your.email@example.com](mailto:r.sharma4@student.vu.nl)
 
 ---
 
