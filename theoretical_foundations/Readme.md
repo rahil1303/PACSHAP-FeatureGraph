@@ -78,11 +78,11 @@ PAC Privacy ensures that, with high probability \((1 - \delta)\), the privacy le
 ```
 
 where:
-
+```math
 - \( L(D) \) is the observed privacy leakage in dataset \(D\),
 - \( \epsilon \) is the privacy budget,
 - \( \delta \) is the probability of failure.
-
+```
 ### Explicit Example Comparing DP and PAC Privacy
 
 In the original research paper, a high privacy budget (\(\epsilon = 10\)) was chosen, resulting in excessive noise addition and a utility (accuracy) drop of about **5–7%**. Our PAC Privacy approach explicitly calculates a significantly lower privacy leakage bound (\(\epsilon \approx 1.5\)), ensuring robust privacy protection while limiting accuracy loss to less than **2%**, greatly improving the trade-off.
