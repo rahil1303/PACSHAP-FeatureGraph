@@ -9,13 +9,24 @@ Initially, a baseline scenario was implemented, where ML models were trained usi
 | Model (Baseline)           | Accuracy | Membership Inference Attack Success |
 |-----------------------------|----------|-------------------------------------|
 | Loan Approval               | 100%     | 🚨 **82.60%**                        |
-| Fraud Detection             | 100%     | 🚨 **50.00%**                        |
+| Fraud Detection             | 100%     | 🚨 **50.00%**(Unexpected due to bad data)                       |
 | Marketing Recommendations   | MSE: 0.0866 | N/A (Regression)                  |
 
 These results highlight substantial vulnerabilities, demonstrating how easily adversaries could identify whether specific data points were present during training.
 
 ### 🚀 Our Privacy-Preserving Hybrid Approach
 To mitigate these vulnerabilities, we've implemented a novel **Hybrid Feature Selection Framework**, integrating:
+
+- **Automated Feature Pool for Enhanced Data Privacy and Model Efficiency**
+
+We introduced a **Feature Pool** structure, categorized explicitly for diverse ML use-cases (e.g., financial, fraud detection, marketing), enabling models to autonomously select only the necessary, relevant features for training. This approach:
+
+- Explicitly addresses **GDPR’s data minimization** requirement by ensuring minimal data exposure.
+- Utilizes **SHAP analysis** and **Knowledge Graphs (KGs)** to contextually validate feature relevance, thereby preventing sensitive or unnecessary data from entering model pipelines.
+- Employs **Autoencoders** to further capture non-linear relationships, ensuring privacy-preserving embeddings that obscure sensitive data.
+
+This structured approach significantly improves security over the baseline models by limiting unnecessary data ingestion and reducing attack vectors, as demonstrated through our membership inference attack evaluations.
+
 
 - **Feature Relevance Check (FRC):** Validates feature necessity explicitly aligning with GDPR's data minimization principle.
 - **Knowledge Graphs (KG):** Captures context-specific feature relationships, ensuring critical features are preserved.
