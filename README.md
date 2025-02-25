@@ -90,6 +90,7 @@ The repository includes implementations, experiments, and visualizations (includ
 - Theoretical_Foundations: Comprehensive theoretical and mathematical justifications for our selected methodologies, explicitly highlighting improvements over the original paper.
 - Archived_Notebooks This folder contains reference notebooks from the original research implementation associated with the paper "Data minimization for GDPR compliance in machine learning models" by Goldsteen et al. (2022).
 - modified_archived_notebooks: This folder contains notebooks adapted and modified from the original archived reference notebooks associated with the research paper titled "Data minimization for GDPR compliance in machine learning models" by Goldsteen et al. (2022). The original implementation and datasets became outdated and incompatible with current library versions and dependencies.
+- Instruction_to_run: It contains some basic instructions to run. Hope they help! 
 
 
 
