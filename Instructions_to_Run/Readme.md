@@ -62,9 +62,4 @@ This removes unnecessary feature selection overhead while aligning with **GDPR c
 
 ## 📢 **Need Help?**  
 If you encounter any issues or need further clarification, feel free to **open an issue** in the repository.  
-
-🚀 **PACSHAP-FeatureGraph** – A **privacy-first** solution for secure feature selection and inference attack mitigation.
-
 ---
-
-✅ **Now you can directly paste this into your `README.md` and push it to GitHub!** 🚀
