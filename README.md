@@ -73,7 +73,7 @@ Unlike entropy-based or generalized data approaches, our methodology ensures tha
 
 ---
 
-For an in-depth critique and detailed logical reasoning behind our approach, please refer to the **[`Logic_Behind`](./Logic_Behind)** folder in this repository.
+For an in-depth critique and detailed logical reasoning behind our approach, please refer to the **[`Logic_Behind`](./Logic_Experiment)** folder in this repository.
 
 
 ## 🔗 Usage:
