@@ -1,132 +1,140 @@
-# 🚀 PACSHAP-FeatureGraph
+# PACSHAP-FeatureGraph
 
-This repository presents an advanced, privacy-preserving approach to feature selection for Machine Learning (ML) models, addressing critical shortcomings of existing methods proposed in the research paper:
+**Privacy-aware feature selection: decide which personal data a model actually needs *before* it ever sees it.**
 
-> 📌 **[\"Data Minimization for GDPR Compliance in Machine Learning Models\"](https://doi.org/10.1016/j.cose.2022.102808) (Goldsteen et al., 2022)**
+GDPR's data minimisation principle (Art. 5(1)(c)) says organisations should only process personal data that is necessary for a stated purpose. In machine learning that is hard to apply, because it is rarely obvious which features a model truly needs. This project explores a simple position: **minimise at the door, not inside the model.** Instead of training on everything and generalising inputs afterwards, it combines model explanations (SHAP), a feature-relationship graph, and learned representations (autoencoders) to filter and transform features up front, and then tests the result against real privacy attacks (membership and attribute inference) using IBM's Adversarial Robustness Toolbox.
 
-The authors of the cited paper propose data generalization at model inference to achieve GDPR-compliant data minimization.
+The project started as a critical replication of Goldsteen et al. (2022), *Data minimization for GDPR compliance in machine learning models*, whose reference notebooks no longer ran against current libraries. I revived those notebooks, identified what I see as gaps in the approach, and built an alternative pipeline on the Adult and Nursery benchmark datasets.
 
-## 🔎 Critique & Improvements:
-
-We identified several critical weaknesses in the cited paper ([Goldsteen et al., 2022](https://doi.org/10.1016/j.cose.2022.102808)) that our project addresses:
-
-### 🚩 Weakness 1: All Data Directly Fed Into ML Models
-
-- **Issue:** Feeding all data directly into ML models poses significant privacy risks, including susceptibility to undetectable backdoors, increasingly prevalent in modern ML attacks.  
-- **Our Counterpoint:** Our method proactively analyzes and selects only the necessary features, significantly reducing privacy risks by limiting unnecessary data exposure.
-
-### 🚩 Weakness 2: Exclusive Handling of Numerical Features
-
-- **Issue:** Their minimization and generalization techniques exclusively handle numerical features, neglecting categorical (string) data, which limits the approach’s applicability to comprehensive ML scenarios.  
-- **Our Counterpoint:** We address both numerical and categorical features, enabling broader and more effective feature selection and minimization.
-
-### 🚩 Weakness 3: Accuracy Loss with Differential Privacy
-
-- **Issue:** Their differential privacy implementation often sacrifices accuracy, particularly noticeable during data generalization and minimization phases. Additionally, their implementation uses outdated libraries, requiring substantial rewriting.  
-- **Our Counterpoint:** We adopt PAC Privacy, ensuring stronger theoretical privacy guarantees without significant accuracy degradation.
-
-### 🚩 Weakness 4: Decision Tree Limitations
-
-- **Issue:** Their reliance on decision trees limits their methodology’s ability to generalize complex feature interactions.  
-- **Our Counterpoint:** We propose alternative methods involving Knowledge Graphs and SHAP values to offer improved, more accurate assessments of feature importance and interactions.
-
-
-### 🚩 Weakness 5: Reliance on Decision Trees for Feature Generalization
-
-- **Issue:** Their method heavily relies on decision trees, assuming they effectively capture model decision boundaries. However, decision trees only make axis-aligned splits, potentially missing subtle and complex feature interactions, especially in deep learning scenarios.  
-- **Our Counterpoint:** Instead of decision trees, we employ a Knowledge Graph and SHAP-driven interpretability to capture complex and context-aware feature relationships accurately.
-
-### 🚩 Weakness 6: User-Driven Dynamic Feature Reduction
-
-- **Issue:** Their approach relies on users gradually disclosing data, making it manual and less practical for automated, large-scale real-world ML pipelines.  
-- **Our Counterpoint:** Our feature selection method automates this process, proactively identifying and filtering unnecessary data before it reaches ML pipelines, enhancing scalability and reliability.
-
-### 🚩 Weakness 7: Feature Contamination Across Multiple Models
-
-- **Issue:** They assume minimizing data in a single model achieves compliance, neglecting cross-model data reuse (loan approvals, fraud detection, marketing), potentially causing privacy leakage.  
-- **Our Counterpoint:** We propose a pre-check system to ensure that only genuinely necessary features enter multiple ML models, effectively preventing cross-model feature contamination.
-
-### 🚩 Weakness 8: Lack of Security Assurance
-
-- **Issue:** They assert that reducing data collection improves security but do not evaluate resistance against adversarial scenarios (e.g., feature inversion attacks).  
-- **Our Counterpoint:** Our approach emphasizes proactive security by eliminating unnecessary data at the outset, significantly reducing potential adversarial misuse.
+> **Status:** research prototype, implemented as Jupyter notebooks. The core idea holds up; several measurements need tightening before the numbers can be treated as conclusive. Both sides are documented below, so you can judge for yourself.
 
 ---
 
-For an in-depth critique and detailed logical reasoning behind our approach, please refer to the **[`Logic_Behind`](./Logic_Behind)** folder in this repository.
+## The idea in one picture
 
-We critique and substantially improve upon this by:
+```
+ raw features ──► 1. relevance graph  ─┐
+                  2. SHAP importance  ─┼─► 3. hybrid selection ──► 4. autoencoder (+ adversary, + noise) ──► model
+                                       │       (union / intersection)        latent features
+                                       │
+                         5. evaluation: membership inference, attribute inference, empirical leakage bound
+```
 
-- **Introducing Knowledge Graphs (KG)** to accurately identify and validate feature relevance before data reaches ML pipelines.
-- **Utilizing SHAP (SHapley Additive exPlanations)** values to achieve explainable, context-aware feature importance assessment.
-- **Integrating PAC (Probably Approximately Correct) Privacy**, offering strong theoretical guarantees that selected features are both privacy-preserving and statistically sound.
-- **Leveraging Autoencoders** to intelligently encode and reconstruct features, identifying critical feature dependencies and redundancies, thus further enhancing feature selection and ensuring minimal data exposure.
+1. **Relevance graph ("knowledge graph").** Features become nodes; an edge links a feature to the target when their correlation passes a threshold. It gives a quick, inspectable view of which features plausibly matter for the task.
+2. **SHAP importance.** An XGBoost model is explained with TreeSHAP to rank features by their actual contribution to predictions.
+3. **Hybrid selection.** Features flagged by the graph and/or SHAP are kept; everything else never enters the pipeline.
+4. **Representation learning.** The selected features are compressed by an autoencoder. A variant trains it against an adversary that tries to recover a sensitive attribute, and adds Gaussian noise to the latent space.
+5. **Attack-based evaluation.** Black-box membership inference and black-box / white-box attribute inference (ART), plus an empirical upper bound on attacker advantage.
 
-Unlike entropy-based or generalized data approaches, our methodology ensures that only genuinely necessary features are selected, significantly reducing the privacy risks associated with ML models. Autoencoders provide an additional layer of intelligent feature reduction, capturing complex relationships while maintaining model accuracy. This project demonstrates empirical improvements in privacy-accuracy trade-offs, providing a robust framework for real-world, large-scale applications in data protection and privacy-sensitive machine learning.
+## Where I disagree with the reference approach
 
-## 🗃️ Key Contributions:
+Goldsteen et al. train a model on the full feature set and then use a decision tree fitted to the model's predictions to *generalise* inputs at inference time (e.g. replacing an exact age with a range), so that less precise personal data is needed when the model is used. My critique, which motivates this project:
 
-- **Federated KG-driven feature relevance checks**, ensuring automated data minimization across multiple ML models.
-- **SHAP-driven interpretability**, providing transparent and explainable feature selection.
-- **PAC Privacy guarantees**, ensuring rigorous compliance with GDPR and privacy standards.
-- **Autoencoder-based feature encoding**, intelligently identifying redundant and dependent features, thereby enhancing privacy-preserving feature selection.
+- **Collection still happens.** Generalising at inference does not change what was collected and used for training. Minimising before training reduces what is stored and exposed in the first place.
+- **One model at a time.** Real organisations reuse the same customer data across several models (credit, fraud, marketing). Minimisation should be checked per purpose, so a feature needed for fraud detection does not silently leak into marketing.
+- **Decision-tree boundaries.** The generalisation is driven by axis-aligned tree splits, which may miss interactions that the original model relies on.
+- **Manual, gradual disclosure.** The workflow asks users to disclose features step by step, which is hard to automate in large pipelines.
+- **Limited adversarial evaluation.** Minimisation is argued to reduce risk, but the paper does not test the minimised models against inference attacks. This project does.
 
----
+## Results
 
-For an in-depth critique and detailed logical reasoning behind our approach, please refer to the **[`Logic_Behind`](./Logic_Experiment)** folder in this repository.
+All numbers below are taken from the saved outputs of the notebooks in this repository (single run, fixed seed), except where marked.
 
+### Adult (target: income; sensitive attribute: sex)
 
-## 🔗 Usage:
+`proposed_method_implementation/hybrid_feature_privacy_attacks_adult.ipynb`
 
-The repository includes implementations, experiments, and visualizations (including 3D privacy-accuracy trade-off grids) that demonstrate the effectiveness of our proposed approach against existing state-of-the-art methodologies.
+| Configuration | Features | Accuracy | Membership inference | Attribute inference (sex) |
+|---|---|---|---|---|
+| Baseline, all features | 14 | 81.65% ¹ | 72.88% ² | 84.19% ² |
+| Graph + SHAP selection | 6 | 81.89% | 72.66% | 72.86% |
+| Selection without `sex` + autoencoder | 5 → 6 latent | 80.93% | 55.53% | n/a |
+| Autoencoder + latent noise (σ = 0.3), `sex` removed | 13 → 6 latent | 73.02% | n/a | 77.54% |
 
----
+¹ From the revived Goldsteen minimisation notebook. ² Reported in an earlier version of this README; not traceable to a saved notebook output.
 
-**📂 Repository Structure:**
+### Nursery (target: class; sensitive attribute: social = "problematic")
 
-- Case_Study: Detailed examinations and real-world scenarios illustrating our solution's practical effectiveness.
-- Logic_Experiment: Q&A formatted justifications for critical design decisions and explicit explanations on why our approach effectively addresses identified gaps.
-- Proposed_Method_Implementation: Contains clearly annotated code implementations and experiments demonstrating our approach and empirical validations against privacy attacks.
-- Theoretical_Foundations: Comprehensive theoretical and mathematical justifications for our selected methodologies, explicitly highlighting improvements over the original paper.
-- Archived_Notebooks This folder contains reference notebooks from the original research implementation associated with the paper "Data minimization for GDPR compliance in machine learning models" by Goldsteen et al. (2022).
-- modified_archived_notebooks: This folder contains notebooks adapted and modified from the original archived reference notebooks associated with the research paper titled "Data minimization for GDPR compliance in machine learning models" by Goldsteen et al. (2022). The original implementation and datasets became outdated and incompatible with current library versions and dependencies.
-- Instruction_to_run: It contains some basic instructions to run. Hope they help! 
+`proposed_method_implementation/hybrid_feature_privacy_attacks_nursery.ipynb`
 
+| Configuration | Accuracy | Black-box attribute inference | White-box attribute inference | Empirical leakage bound (95%) |
+|---|---|---|---|---|
+| Baseline decision tree | 92.00% | 55.45% ³ | 60.82% ³ | n/a |
+| Graph + SHAP selection | 89.99% | 69.75% | 69.75% | n/a |
+| Adversarial autoencoder + noise σ = 0.8 | 81.35% | 63.05% | n/a | 15.07% |
+| Same, stronger adversary (weight 6.0) | 78.03% | 63.96% | n/a | 15.97% |
+| Differential-privacy variant | 43.60% | 66.07% | n/a | 18.09% |
 
+³ See the notes below: the baseline attack targeted a different column.
 
-## 📚 References & Citations
+### What the results support
 
-- **Goldsteen, et al. (2022)**.  
-  *"Data Minimization for GDPR Compliance in Machine Learning Models"*  
-  IEEE Symposium on Security and Privacy (SP), 2022.
+- **Aggressive minimisation costs little accuracy on Adult.** Going from 14 features to 6 left accuracy unchanged (81.65% → 81.89%), and compressing 5 features into a 6-dimensional latent space still gave 80.93%. That is the central claim of the project, and it holds.
+- **Removing a sensitive attribute is not enough on its own.** With `sex` removed, an attacker still recovered it about 78% of the time from the remaining features and embeddings. This is a useful, honest finding: proxies matter, which is exactly why relevance checks should look at relationships between features and not just drop columns.
+- **The autoencoder pipeline coincided with a large drop in membership-inference success** (72.66% → 55.53%) at almost no accuracy cost. See the caveats below before reading this as causal.
 
-- **Mienye, Ibomoiye Domor, and Yanxia Sun (2023)**.  
-  *"A Machine Learning Method with Hybrid Feature Selection for Improved Credit Card Fraud Detection"*  
-  Applied Sciences 13, no. 12: 7254. [https://doi.org/10.3390/app13127254](https://doi.org/10.3390/app13127254)
+## Another way to read these results
 
-- **Goldwasser, Shafi, Michael P. Kim, Vinod Vaikuntanathan, and Or Zamir (2022)**.  
-  *"Planting Undetectable Backdoors in Machine Learning Models"*  
-  IEEE Symposium on Foundations of Computer Science (FOCS), 2022.
+I want this repository to be useful to someone evaluating the method critically, so here is the strongest case against over-reading the numbers. None of this sinks the core idea; it marks what still needs to be shown.
 
-- **Rubenstein, Paul, Peter Bartlett, and Thomas Steinke (2022)**.  
-  *"PAC Privacy: Automatic Privacy Measurement and Control of Data Processing"*  
-  Advances in Neural Information Processing Systems (NeurIPS), 2022.
+- **Attack accuracy needs a majority-class baseline, not 50%.** The leakage bound is computed as *attack accuracy minus 0.5*. But about two-thirds of Adult records are male, and exactly one third of Nursery records have `social = problematic`. An attacker who always guesses the majority value already scores roughly 67% on both. Against that baseline, Adult attribute inference at 73–78% is a modest gain over guessing, and every Nursery attack after the autoencoder (63–66%) is *at or below* guessing.
+- **Nursery cannot really test attribute inference from features.** Nursery is a full factorial dataset: every combination of feature values appears exactly once. So `social` is statistically independent of the other features by construction, and no attacker that sees only features can beat the majority guess. That explains why every configuration, from mild noise to a DP variant at 44% accuracy, lands in the same 63–66% band. A dataset with real correlations between the sensitive attribute and other features (Adult, COMPAS, or a credit dataset) is a better testbed.
+- **Graph + SHAP selection *raised* attribute-inference success on Nursery** (55% → 70%), the opposite of what the method intends. Two notebook issues contribute: SHAP ranked `social` itself as important, so the sensitive attribute was *selected* as an input; and the baseline attack used column index 0, which after one-hot encoding is not `social`. On Adult, `sex` was likewise part of the selected set before being removed later.
+- **The membership-inference numbers use different protocols.** The 72.66% figure trains the attack on one half of the data and tests it on the other half; the 55.53% figure trains and evaluates the attack on the same records. Both use unpruned decision trees, which memorise training data and are unusually vulnerable to membership inference. Part of the drop may come from the change of input space rather than from privacy protection. A fair comparison would hold the protocol fixed, report attack AUC alongside accuracy, and average over several seeds.
+- **The "PAC Privacy" bound is an empirical confidence bound, not PAC Privacy.** The notebooks compute *attack accuracy − 0.5 + √(ln(2/δ)/2n)*, a Hoeffding interval on how well one specific attacker did. PAC Privacy (Xiao & Devadas, 2023) is a different, formal framework: it bounds what *any* adversary can recover by simulating the full data-processing mechanism and calibrating the noise to its output variance. The noise in these notebooks is set by hand (σ = 0.2–0.8). The empirical bound is still a meaningful audit metric, but it should be described as such, and a true PAC Privacy calibration is listed under next steps.
+- **The "knowledge graph" is a correlation graph.** Edges come from Pearson correlation between label-encoded features and the target, so the graph adds little beyond a correlation filter, and label encoding makes correlations of nominal features (e.g. occupation) arbitrary. A real knowledge graph would bring in information the data does not contain: domain rules, purpose definitions, legal categories of data.
+- **Feature selection was partly manual.** The Adult hybrid set is hand-picked after looking at the graph and SHAP outputs; the Nursery set is a union. An automated, reproducible selection rule is needed before the method can be called automatic.
+- **The comparison chart in `Logic_Experiment/` is illustrative only.** Its accuracy and attack values are typed in by hand from different notebooks and datasets (DP on Nursery, anonymisation on Adult), its 88% hybrid accuracy does not match any notebook, and its ROC curves are drawn from synthetic scores generated to match chosen AUC values. It should not be read as an experimental result.
+- **The company case study runs on synthetic data with random labels.** Because the labels are random, any accuracy above about 50% on them signals leakage or a bug rather than learning. The baseline's 100% comes from a deliberately leaky feature, and the hybrid notebook computes "membership inference accuracy" by comparing membership predictions with the *loan labels* rather than with membership ground truth. The case study is a good walkthrough of the multi-model scenario, but its numbers are not evidence.
+- **On the backdoor argument.** Goldwasser et al. (2022) show that a *malicious model trainer* can plant undetectable backdoors. That is a supply-chain risk, and it is not reduced by giving the model fewer features. The stronger argument for minimising before training is simply the one GDPR makes: data that is never collected cannot leak.
 
-- **Pulls, Tobias, and Mike Perry (2020)**.  
-  *"Raising the Bar: Improved Fingerprinting Attacks and Defenses for Video Streaming Traffic"*  
-  USENIX Security Symposium, 2020.
+## Next steps
 
-- **Shokri, Reza, Marco Stronati, Congzheng Song, and Vitaly Shmatikov (2017)**.  
-  *"Membership Inference Attacks against Machine Learning Models"*  
-  IEEE Symposium on Security and Privacy (Oakland), 2017.
+These are the changes that would turn the prototype into a defensible result:
 
+1. Use a fixed evaluation protocol for every configuration: held-out attack training and test sets, attack AUC plus accuracy, majority-class baselines, and 5–10 seeds with confidence intervals.
+2. Use pruned or regularised target models, so that membership inference measures privacy rather than overfitting.
+3. Automate selection with an explicit rule (for example, keep the smallest feature set within *x*% of baseline accuracy, and never select declared sensitive attributes).
+4. Replace label encoding with one-hot or target encoding in the relevance graph, and enrich the graph with purpose-level rules, so it does more than a correlation filter.
+5. Calibrate noise with the PAC Privacy algorithm of Xiao & Devadas rather than by hand, and report the resulting guarantee next to the empirical attack results.
+6. Evaluate attribute inference on datasets where the sensitive attribute is genuinely correlated with other features.
+7. Package the pipeline as a small Python module with one script per dataset.
 
-**✉️ Contact:**
+## Repository structure
 
-For questions or collaboration, please contact:
+| Folder | Contents |
+|---|---|
+| `proposed_method_implementation/` | The proposed pipeline on Adult and Nursery: relevance graph, SHAP, selection, autoencoders, attacks. **Start here.** |
+| `Case_Study/` | Multi-model company scenario (loan, fraud, marketing) on synthetic data. Illustrative walkthrough. |
+| `Logic_Experiment/` | Design rationale as Q&A, plus an illustrative comparison chart (see caveats above). |
+| `theoretical_foundations/` | Motivation and background for each component. |
+| `archived_notebooks/` | Original reference notebooks accompanying Goldsteen et al. Kept for reference; they do not run with current libraries. |
+| `modified_archived_notebooks/` | The same notebooks, updated to run with current library versions. |
+| `Instructions_to_Run/` | Setup and run instructions. |
 
-- **Rahil S:** [r.sharma4@student.vu.nl](mailto:r.sharma4@student.vu.nl)
+## Running the notebooks
 
----
+```bash
+git clone https://github.com/rahil1303/PACSHAP-FeatureGraph.git
+cd PACSHAP-FeatureGraph
+pip install -r requirements.txt
+jupyter notebook proposed_method_implementation/hybrid_feature_privacy_attacks_adult.ipynb
+```
 
-🌟 **Thank you for exploring PACSHAP-FeatureGraph!** 🌟
+The notebooks were developed in Google Colab (Python 3.11) and download the Adult and Nursery datasets directly from the UCI Machine Learning Repository, so an internet connection is needed. See `Instructions_to_Run/` for details.
+
+## References
+
+- Goldsteen, A., Ezov, G., Shmelkin, R., Moffie, M., & Farkash, A. (2022). Data minimization for GDPR compliance in machine learning models. *AI and Ethics*, 2, 477–491. https://doi.org/10.1007/s43681-021-00095-8
+- Goldsteen, A., Saadi, O., Shmelkin, R., Shachor, S., & Razinkov, N. (2023). AI privacy toolkit. *SoftwareX*, 22, 101352. Code: https://github.com/ElsevierSoftwareX/SOFTX-D-22-00422
+- Xiao, H., & Devadas, S. (2023). PAC Privacy: Automatic privacy measurement and control of data processing. *Advances in Cryptology, CRYPTO 2023*. https://arxiv.org/abs/2210.03458
+- Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. *Advances in Neural Information Processing Systems (NeurIPS)*.
+- Shokri, R., Stronati, M., Song, C., & Shmatikov, V. (2017). Membership inference attacks against machine learning models. *IEEE Symposium on Security and Privacy (S&P)*.
+- Edwards, H., & Storkey, A. (2016). Censoring representations with an adversary. *International Conference on Learning Representations (ICLR)*.
+- Nicolae, M.-I., et al. (2018). Adversarial Robustness Toolbox v1.0.0. https://arxiv.org/abs/1807.01069
+- Goldwasser, S., Kim, M. P., Vaikuntanathan, V., & Zamir, O. (2022). Planting undetectable backdoors in machine learning models. *IEEE Symposium on Foundations of Computer Science (FOCS)*.
+- Mienye, I. D., & Sun, Y. (2023). A machine learning method with hybrid feature selection for improved credit card fraud detection. *Applied Sciences*, 13(12), 7254. https://doi.org/10.3390/app13127254
+
+## Contact
+
+**Rahil Sharma** · [officialthingsrahil@gmail.com](mailto:officialthingsrahil@gmail.com) · [LinkedIn](https://www.linkedin.com/in/rahil-sharma-ba5b6718b) · [GitHub](https://github.com/rahil1303)

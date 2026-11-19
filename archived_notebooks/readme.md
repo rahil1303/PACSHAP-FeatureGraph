@@ -15,18 +15,22 @@ These notebooks are included in this repository solely as archival resources to 
 If referencing these archival notebooks, please cite the original research paper directly:
 
 ```bibtex
-@misc{Goldsteen2022DataMinimization,
-  author = {Abigail Goldsteen and Gilad Ezov and Ron Shmelkin and Micha Moffie and Ariel Farkash},
-  title = {Data minimization for GDPR compliance in machine learning models},
-  year = {2022},
-  publisher = {AI and Ethics},
-  howpublished = {\url{https://doi.org/10.1007/s43681-021-00095-8}}
+@article{Goldsteen2022DataMinimization,
+  author  = {Abigail Goldsteen and Gilad Ezov and Ron Shmelkin and Micha Moffie and Ariel Farkash},
+  title   = {Data minimization for GDPR compliance in machine learning models},
+  journal = {AI and Ethics},
+  volume  = {2},
+  pages   = {477--491},
+  year    = {2022},
+  doi     = {10.1007/s43681-021-00095-8}
 }
 
-@misc{Goldsteen2022GitHubRepo,
-  author = {Abigail Goldsteen and Gilad Ezov and Ron Shmelkin and Micha Moffie and Ariel Farkash},
-  title = {SOFTX-D-22-00422},
-  year = {2022},
-  publisher = {GitHub},
-  howpublished = {\url{https://github.com/ElsevierSoftwareX/SOFTX-D-22-00422}}
+@article{Goldsteen2023AIPrivacyToolkit,
+  author  = {Abigail Goldsteen and Ola Saadi and Ron Shmelkin and Shlomit Shachor and Natalia Razinkov},
+  title   = {AI privacy toolkit},
+  journal = {SoftwareX},
+  volume  = {22},
+  pages   = {101352},
+  year    = {2023},
+  note    = {Code: https://github.com/ElsevierSoftwareX/SOFTX-D-22-00422}
 }

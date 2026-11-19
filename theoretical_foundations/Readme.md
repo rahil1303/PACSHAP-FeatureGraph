@@ -32,96 +32,56 @@ We explicitly identify and address the following key weaknesses in Goldsteen et 
 - **Absence of Robust Security Assurance:**
   - Privacy claims are not validated against adversarial scenarios explicitly.
 
-### 🎯 Theoretical Justifications of Our Approach
+### 🎯 Why Each Component Is There
 
 #### **SHAP (SHapley Additive exPlanations)**
 
-SHAP values derive from cooperative game theory, providing clear, interpretable, and theoretically grounded feature importance scores. Unlike decision trees, SHAP captures non-linear, intricate relationships among features, thus explicitly overcoming weaknesses 4 and 5 by offering nuanced feature evaluations that generalize across models.
+SHAP values come from cooperative game theory (Lundberg & Lee, 2017): each feature's contribution to a prediction is its average marginal effect across all coalitions of features. Unlike the axis-aligned splits of a single decision tree, SHAP explains the actual model in use, including non-linear interactions, which addresses weaknesses 4 and 5. One caution: SHAP measures what a model *uses*, not what it *needs*; correlated features can share or swap importance, so SHAP rankings should be paired with a check that removing a feature really does not hurt accuracy.
 
-#### **Knowledge Graph (KG) Approach**
+#### **Feature Relationship Graph ("Knowledge Graph")**
 
-Knowledge Graphs represent explicit relational structures among features and outcomes. Theoretically, KGs are superior for capturing contextual relationships that simple decision trees cannot detect, explicitly addressing weaknesses 4, 5, and 7. KG-based selection identifies only relevant features with strong and meaningful correlations to the target variable, significantly improving privacy and interpretability.
+In the current notebooks the graph links a feature to the target when their Pearson correlation exceeds a threshold. That makes relationships visible and inspectable, but it is effectively a correlation filter. Its value as a *knowledge* graph would come from adding information the data does not contain: which features are legally sensitive, which purposes each model serves, and which features are proxies for one another. That is the direction needed to address weaknesses 4, 5 and 7 fully.
 
-#### **Hybrid Approach (KG & SHAP Intersection/Union)**
+#### **Hybrid Approach (Intersection / Union)**
 
-Our hybrid methodology explicitly combines SHAP values and Knowledge Graph analyses to create robust feature selection criteria:
+- **Intersection** keeps only features that both methods flag: the most minimal set, at some risk of dropping a useful feature.
+- **Union** keeps features flagged by either method: safer for accuracy, less minimal.
 
-- **Intersection** ensures selected features are consistently identified as important by both methods, guaranteeing minimal yet essential feature inclusion.
-- **Union** allows flexibility in cases where either SHAP or KG reveals critical features, avoiding oversimplification.
+A practical rule for future work: choose the smallest set whose accuracy stays within a set tolerance of the baseline, and never select attributes declared sensitive.
 
-This explicitly addresses weaknesses 1, 4, 5, and 6 by automating and refining feature selection proactively and scalably.
+#### **Autoencoders and Adversarial Training**
 
-#### **Autoencoders for Privacy Preservation**
+An autoencoder compresses the selected features into a lower-dimensional latent space. Trained against an adversary that tries to predict a sensitive attribute from the latent code (Edwards & Storkey, 2016), it is pushed to discard that information. Compression alone is not a privacy guarantee: an encoder is a deterministic function of the input, so whatever information survives in the latent space can still be inferred. The experiments confirm this, since a sensitive attribute removed from the input was still recovered from the embeddings through proxy features.
 
-Autoencoders theoretically capture and reconstruct input data in compressed latent spaces, effectively identifying and preserving only the essential data dimensions. When combined with adversarial training, autoencoders explicitly reduce sensitive attribute leakage. This method:
+#### **PAC Privacy**
 
-- Mitigates risks associated with directly feeding sensitive features into models.
-- Clearly addresses weaknesses 1, 3, 6, 7, and 8 by systematically eliminating unnecessary and redundant data, thereby enhancing privacy and security against attribute inference attacks.
+PAC Privacy (Xiao & Devadas, CRYPTO 2023) defines privacy as the difficulty, for any adversary, of recovering sensitive data within a chosen error and confidence. Its key practical feature is automation: by running the data-processing mechanism many times on subsamples and measuring the variance of its output, it computes how much noise must be added to reach a target guarantee, often far less noise than worst-case Differential Privacy requires.
 
-#### **PAC (Probably Approximately Correct) Privacy**
-
-PAC Privacy provides explicit theoretical bounds and privacy guarantees through probabilistic measures. Unlike DP, PAC Privacy:
-
-- Delivers stronger, rigorous guarantees with clear theoretical bounds on privacy leakage.
-- Minimizes accuracy loss compared to traditional DP methods.
-
-Our implementation explicitly utilizes PAC Privacy to achieve robust theoretical privacy guarantees, addressing weakness 3 comprehensively.
-
-### 📐 Mathematical Foundations of Privacy-Utility Tradeoff
-
-### PAC Privacy and Leakage Bounds
-
-Mathematical Foundations of Privacy-Utility Tradeoff
-
-PAC Privacy ensures that, with high probability \((1 - \delta)\), the privacy leakage \(L(D)\) remains bounded. The key inequality is:
+**What the notebooks currently do is different and simpler.** They add hand-picked Gaussian noise (σ = 0.2 to 0.8) to the latent features and then report an *empirical leakage bound* for one trained attacker:
 
 ```math
-\mathbb{P}\left[L(D) \leq \epsilon\right] \geq 1 - \delta
+\text{bound} = (\text{attack accuracy} - 0.5) + \sqrt{\frac{\ln(2/\delta)}{2n}}
 ```
 
-where:
+This is a Hoeffding confidence bound: with probability $1-\delta$, that attacker's true advantage over a 50% guess is below the bound. It is a useful audit metric, but it does not cover other attackers, and the 0.5 reference should be replaced by the majority-class rate of the sensitive attribute (about 0.67 for both Adult `sex` and Nursery `social`). Implementing the actual PAC Privacy noise calibration is the main theoretical next step.
 
-- \( L(D) \) is the observed privacy leakage in dataset \(D\).
-- \( \epsilon \) is the privacy budget.
-- \( \delta \) is the probability of failure.
+### 📐 Privacy-Utility Trade-off
 
----
+The intuition behind the approach is that noise and generalisation spread over every feature cost accuracy everywhere, while removing features the task does not need costs little or nothing. Selecting first and protecting only what remains should therefore give a better privacy-utility trade-off than protecting the full feature set. On Adult this is borne out on the utility side: 14 features reduced to 6 kept accuracy at about 81%. Showing the privacy side convincingly requires the evaluation changes listed in the main README (one attack protocol, majority-class baselines, several seeds).
 
-#### Explicit Example Comparing DP and PAC Privacy
+### 📉 Empirical Validation So Far
 
-In the original research paper, a high privacy budget (e.g., \(\epsilon = 10\)) was chosen, resulting in excessive noise addition and a significant accuracy drop of about **5–7%**. 
+- Adult: accuracy maintained (81.65% → 81.89%) with 6 of 14 features; membership-inference success fell from 72.66% to 55.53% after the autoencoder, measured under two different attack protocols.
+- Adult: removing `sex` alone did not prevent its recovery (about 78%), showing the need for proxy-aware selection.
+- Nursery: attribute-inference results sit at or below the majority-class baseline for every configuration, because `social` is independent of the other features in this factorial dataset.
 
-Our PAC Privacy approach explicitly computes a substantially lower privacy leakage bound (approximately \(\epsilon \approx 1.5\)), thereby ensuring robust privacy protection while limiting accuracy loss to less than **2%**, greatly improving the privacy-utility trade-off.
+### ✅ Summary
 
----
+The components are well motivated: SHAP for model-grounded relevance, a relationship graph for inspectability and purpose-level reasoning, adversarial autoencoders for removing sensitive signal, and PAC Privacy as a target for calibrated noise. The current implementation demonstrates the utility side of selective minimisation; the privacy side and the formal guarantees are the open work.
 
-#### Privacy-Utility Tradeoff in Our Approach
+### 📚 References
 
-Traditional DP techniques suffer from excessive accuracy loss due to indiscriminate noise addition across all numerical features. For instance, the Adult dataset contains **6 numerical features**, and applying DP to all numeric features unnecessarily degraded performance.
-
-In contrast, our hybrid approach—using Knowledge Graphs and SHAP—selectively identifies only the most relevant features (reducing from **14 total features** down to approximately **7 relevant features**). This targeted selection significantly enhances accuracy and robustness, as formalized by:
-
-```math
-U_{\text{hybrid}} = U_{\text{baseline}} - (\alpha \cdot L_{\text{privacy}}) + \beta
-```
-
-where:
-
-- \(U_{\text{hybrid}}\) is the achieved utility of our hybrid approach.
-- \(U_{\text{baseline}}\) represents the baseline model utility.
-- \(L_{\text{privacy}}\) denotes the privacy loss factor introduced by noise.
-- Parameters \(\alpha\) and \(\beta\) quantify, respectively, the trade-off between privacy and utility, and the explicit gain from feature relevance optimization.
-
-Our method ensures explicitly that privacy-preserving noise is added only to genuinely necessary and relevant features, thereby significantly enhancing model utility while maintaining rigorous and explicit privacy guarantees.
-
-### 📉 Empirical Comparison & Validation
-
-Empirical validation across the Adult and Nursery datasets explicitly demonstrates our hybrid method's effectiveness:
-
-- Maintained predictive accuracy comparable to baseline methods.
-- Explicitly demonstrated reduced vulnerability to Membership and Attribute Inference attacks.
-- Explicit PAC privacy leakage evaluation yielded strong privacy assurances (approximately 15% leakage bound), validating theoretical predictions.
-
-### ✅ Summary of Improvements & Contributions
-
-Our theoretically justified and empirically validated hybrid approach explicitly counters each weakness identified in the original research paper. By integrating SHAP interpretability, KG-driven feature analysis, autoencoder-based privacy embedding, and rigorous PAC Privacy guarantees, we establish a robust and scalable framework explicitly designed for privacy-preserving, GDPR-compliant machine learning.
+- Goldsteen, A., et al. (2022). Data minimization for GDPR compliance in machine learning models. *AI and Ethics*, 2, 477–491. https://doi.org/10.1007/s43681-021-00095-8
+- Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. *NeurIPS*.
+- Edwards, H., & Storkey, A. (2016). Censoring representations with an adversary. *ICLR*.
+- Xiao, H., & Devadas, S. (2023). PAC Privacy: Automatic privacy measurement and control of data processing. *CRYPTO 2023*. https://arxiv.org/abs/2210.03458

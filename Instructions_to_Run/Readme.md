@@ -1,5 +1,5 @@
 # PACSHAP-FeatureGraph 🚀  
-A privacy-first approach to feature selection and inference attack mitigation. Instructions, althouhg the entire project is quite self explanatory but just in case attaching some insturctions below. Thank you! 
+A privacy-first approach to feature selection and inference attack mitigation. The notebooks are largely self-explanatory, but here are the steps to run them.
 
 ## 🚀 How to Run the Project  
 
@@ -19,30 +19,26 @@ pip install -r requirements.txt
 ### 3️⃣ **Run the Baseline Model**  
 Navigate to the Baseline Case Study and execute the Jupyter Notebook:  
 ```bash
-cd Case_Study/Baseline_Model
-jupyter notebook Base_Line_Model_Company_Case_Study.ipynb
+jupyter notebook Case_Study/Base_Line_Model_Company_Case_Study.ipynb
 ```
 
 ### 4️⃣ **Run the Hybrid Privacy Approach**  
-For the improved model with Knowledge Graph, SHAP, Autoencoders, and PAC Privacy, execute:  
+For the multi-model case study with the feature pool, SHAP and autoencoders, execute:  
 ```bash
-cd Case_Study/Hybrid_Proposed_Approach
-jupyter notebook Hybrid_Proposed_Approach_Case_Study_KG_SHAP.ipynb
+jupyter notebook Case_Study/Hybrid_Proposed_Approach_Case_Study_KG_SHAP.ipynb
 ```
 
 ### 5️⃣ **Running Privacy Attack Evaluations**  
 To compare inference attack vulnerabilities, execute:  
 ```bash
-cd Privacy_Evaluation
-jupyter notebook hybrid_privacy_inference_analysis.ipynb
+jupyter notebook Logic_Experiment/hybrid_privacy_inference_analysis.ipynb   # illustrative only, see its banner
 ```
 
 ### 6️⃣ **Feature Privacy Attacks on Different Datasets**  
 To analyze and compare privacy attacks on the **Adult & Nursery datasets**, run:  
 ```bash
-cd Feature_Attack_Analysis
-jupyter notebook hybrid_feature_privacy_attacks_adult.ipynb
-jupyter notebook hybrid_feature_privacy_attacks_nursery.ipynb
+jupyter notebook proposed_method_implementation/hybrid_feature_privacy_attacks_adult.ipynb
+jupyter notebook proposed_method_implementation/hybrid_feature_privacy_attacks_nursery.ipynb
 ```
 
 ---
@@ -52,11 +48,12 @@ jupyter notebook hybrid_feature_privacy_attacks_nursery.ipynb
 ```bash
 pip install notebook
 ```  
-✅ Adjust dataset paths if needed for external data sources.  
+✅ The Adult and Nursery notebooks download their data from the UCI Machine Learning Repository, so you need an internet connection.
+✅ The notebooks were developed in Google Colab (Python 3.11); the `!pip install` cells inside them install `ai-privacy-toolkit`, `adversarial-robustness-toolbox`, `xgboost` and `shap` if needed.  
 
 ### 📌 **Feature Pooling Automation**  
 The **Feature Pooling** mechanism ensures that ML models dynamically select only relevant features, reducing privacy risks and improving efficiency.  
-This removes unnecessary feature selection overhead while aligning with **GDPR compliance**.
+It is demonstrated on synthetic data in `Case_Study/`.
 
 ---
 

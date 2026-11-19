@@ -20,16 +20,20 @@ This folder contains implementations and evaluations of our proposed hybrid feat
 
 #### Key Results:
 
-| Model Configuration            | Accuracy | Membership Inference Attack Success | Attribute Inference Attack Success |
-|--------------------------------|----------|-------------------------------------|------------------------------------|
-| Baseline Model                 | 81.65%   | 72.88%                              | 84.19%                             |
-| KG + SHAP Hybrid Approach      | 81.89%   | 72.79%                              | 72.86%                             |
-| KG + SHAP + Autoencoder Hybrid | 80.93%   | 55.53%                              | -                                  |
+| Model Configuration | Features | Accuracy | Membership Inference Attack Success | Attribute Inference Attack Success (sex) |
+|---|---|---|---|---|
+| Baseline, all features | 14 | 81.65% ¹ | 72.88% ² | 84.19% ² |
+| KG + SHAP hybrid selection | 6 | 81.89% | 72.66% | 72.86% |
+| Hybrid selection without `sex` + autoencoder | 5 → 6 latent | 80.93% | 55.53% | n/a |
+| Autoencoder + latent noise (σ = 0.3), `sex` removed | 13 → 6 latent | 73.02% | n/a | 77.54% |
+
+¹ From the revived Goldsteen minimisation notebook. ² Reported in an earlier version of this README; not traceable to a saved notebook output.
 
 #### Key Observations:
 
-- Integrating autoencoders with the hybrid approach effectively maintained accuracy and significantly reduced vulnerability to privacy attacks.
-- The explicit removal of sensitive attributes further enhanced ethical compliance and privacy preservation.
+- Cutting the feature set from 14 to 6, and then compressing it with an autoencoder, kept accuracy around 81%.
+- Removing `sex` did not stop an attacker from recovering it (about 78%), because other features act as proxies. Note that roughly two-thirds of records are male, so guessing the majority already scores about 67%.
+- Membership-inference success dropped from 72.66% to 55.53%, but the two numbers come from different attack protocols (held-out vs. same data), so the size of the drop should be confirmed under one protocol. See "Another way to read these results" in the main README.
 
 ---
 
@@ -49,13 +53,19 @@ This folder contains implementations and evaluations of our proposed hybrid feat
 
 #### Key Results:
 
-| Model Configuration                    | Accuracy | Black-Box Attack Success | White-Box Attack Success | PAC Privacy Leakage Bound (95%) |
-|----------------------------------------|----------|--------------------------|--------------------------|---------------------------------|
-| Baseline Model                         | 92.00%   | 55.45%                   | 62.30%                   | -                               |
-| KG + SHAP Hybrid Approach              | 89.99%   | 69.75%                   | 74.34%                   | -                               |
-| KG + SHAP + Autoencoder (latent+noise) | 81.35%   | 63.05%                   | -                        | 15.07%                          |
+| Model Configuration | Accuracy | Black-Box Attack Success | White-Box Attack Success | Empirical Leakage Bound (95%) |
+|---|---|---|---|---|
+| Baseline decision tree | 92.00% | 55.45% ³ | 60.82% ³ | n/a |
+| KG + SHAP hybrid selection | 89.99% | 69.75% | 69.75% | n/a |
+| Adversarial autoencoder + noise σ = 0.8 | 81.35% | 63.05% | n/a | 15.07% |
+| Same, stronger adversary (weight 6.0) | 78.03% | 63.96% | n/a | 15.97% |
+| Differential-privacy variant | 43.60% | 66.07% | n/a | 18.09% |
+
+³ The baseline attack targeted column index 0, which after one-hot encoding is not `social`.
 
 #### Key Observations:
 
-- The hybrid approach significantly reduces attribute inference attack success, clearly demonstrating privacy protection.
-- Autoencoder embeddings combined with adversarial training and controlled noise effectively achieve rigorous PAC privacy bounds with minimal accuracy degradation.
+- The hybrid selection kept accuracy close to the baseline (92.0% → 90.0%), and the autoencoder variants traded accuracy for compression (78–81%).
+- Attribute inference did **not** go down after selection (55% → 70%): SHAP ranked `social` itself as important, so the sensitive attribute was selected as an input. Excluding declared sensitive attributes from selection fixes this.
+- After the autoencoder, every configuration lands at 63–66% attack accuracy, which is at or below the 67% an attacker gets by always guessing "not problematic". Nursery is a full factorial dataset, so `social` is independent of the other features by construction; this dataset cannot show attribute-inference protection from features alone.
+- The "leakage bound" is an empirical Hoeffding bound on one attacker's accuracy above 50%, not a formal PAC Privacy guarantee (Xiao & Devadas, 2023).
