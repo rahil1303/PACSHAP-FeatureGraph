@@ -3,6 +3,8 @@
 ### Problem Statement
 Companies frequently ingest extensive user data, employing it across multiple machine learning (ML) models such as **Loan Approval**, **Fraud Detection**, and **Marketing Recommendations**. However, this broad utilization of data significantly elevates privacy vulnerabilities, particularly from **Membership Inference Attacks (MIA)** and **Attribute Inference Attacks**, potentially breaching GDPR compliance and consumer trust.
 
+> **About the numbers in this case study.** Both notebooks use synthetic data whose labels (`loan_default`, `fraudulent_transaction`) are drawn at random, independently of the features. On random labels, accuracy above about 50% indicates leakage or a bug rather than learning: the baseline's 100% comes from a deliberately leaky feature built from the label, and the hybrid notebook's 89% comes from a regenerated dataset after a PCA step. The hybrid notebook also computes "membership inference success" by comparing the attack's membership predictions with the **loan labels** instead of with true membership, so the 49% / 47% figures are not membership measurements. Treat this case study as a walkthrough of the multi-model scenario and the feature-pool idea, not as evidence; the measured results are in `proposed_method_implementation/`.
+
 ### 🔍 Baseline Evaluation and Identified Risks
 Initially, a baseline scenario was implemented, where ML models were trained using all available data without explicit privacy-preserving measures. Although this yielded high predictive accuracy, it severely exposed the models to privacy attacks:
 
@@ -32,7 +34,7 @@ This structured approach significantly improves security over the baseline model
 - **Knowledge Graphs (KG):** Captures context-specific feature relationships, ensuring critical features are preserved.
 - **SHAP Analysis:** Quantitatively measures feature relevance, ensuring only impactful features enter the model.
 - **Autoencoders:** Further compress and encode sensitive features, mitigating indirect privacy leaks.
-- **PAC Privacy:** Provides rigorous, theoretical guarantees for privacy protection, significantly limiting privacy leakage.
+- **PAC Privacy (planned):** A target for calibrated noise with formal guarantees (Xiao & Devadas, 2023); the current notebooks add hand-tuned noise instead.
 
 ### 🚀 Improved Results with Our Hybrid Approach
 Our hybrid method demonstrated enhanced privacy protection with robust predictive performance:
@@ -45,26 +47,21 @@ Our hybrid method demonstrated enhanced privacy protection with robust predictiv
 
 ### 🛡️ How Our Approach Enhances Privacy and Utility
 - **Privacy Preservation:**  
-  By utilizing a hybrid KG+SHAP+Autoencoder framework, we drastically reduce unnecessary exposure of data, significantly decreasing the attack surface for inference attacks. PAC Privacy further ensures precise control over privacy leakage.
+  By utilizing a hybrid KG+SHAP+Autoencoder framework, we drastically reduce unnecessary exposure of data, significantly decreasing the attack surface for inference attacks. PAC Privacy is the planned route to calibrated, provable control over leakage.
 
 - **Utility Preservation:**  
-Unlike Differential Privacy (DP), which can excessively degrade performance by adding uniform noise, PAC Privacy carefully bounds noise addition, preserving model accuracy.
+Differential Privacy (DP) can degrade performance by adding noise to every feature; selecting features first, and calibrating noise with PAC Privacy, aims to protect only what the model needs.
 
 ### 📌 Conclusion
-Our proposed hybrid feature selection and privacy-preserving approach demonstrates a clear advantage in terms of security robustness and regulatory compliance over traditional ML approaches. By proactively filtering relevant features based on context (KG), importance metrics (SHAP), and encoding sensitive attributes via autoencoders, we've achieved optimal privacy-utility balance, substantially outperforming baseline methods.
+Our proposed hybrid feature selection and privacy-preserving approach demonstrates a clear advantage in terms of security robustness and regulatory compliance over traditional ML approaches. By proactively filtering relevant features based on context (KG), importance metrics (SHAP), and encoding sensitive attributes via autoencoders, this design aims for a better privacy-utility balance than protecting the full feature set; confirming it needs real data and a consistent attack protocol.
 
 ---
 
 ### 📚 References
-- Mienye, Ibomoiye Domor, and Yanxia Sun. 2023. "A Machine Learning Method with Hybrid Feature Selection for Improved Credit Card Fraud Detection." *Applied Sciences* 13, no. 12: 7254. [doi.org/10.3390/app13127254](https://doi.org/10.3390/app13127254)
-
-- Shafi Goldwasser, Michael P. Kim, Vinod Vaikuntanathan, Or Zamir. 2022. "Planting Undetectable Backdoors in Machine Learning Models." *IEEE Symposium on Foundations of Computer Science (FOCS)*.
-
-- Paul Rubenstein, Peter Bartlett, Thomas Steinke. 2022. "PAC Privacy: Automatic Privacy Measurement and Control of Data Processing." *NeurIPS*.
-
-- Tobias Pulls, Mike Perry. 2020. "Raising the Bar: Improved Fingerprinting Attacks and Defenses for Video Streaming Traffic." *USENIX Security Symposium*.
-
-- Reza Shokri, Marco Stronati, Congzheng Song, Vitaly Shmatikov. 2017. "Membership Inference Attacks against Machine Learning Models." *IEEE Symposium on Security and Privacy (Oakland)*.
+- Mienye, I. D., & Sun, Y. (2023). A machine learning method with hybrid feature selection for improved credit card fraud detection. *Applied Sciences*, 13(12), 7254. https://doi.org/10.3390/app13127254
+- Goldwasser, S., Kim, M. P., Vaikuntanathan, V., & Zamir, O. (2022). Planting undetectable backdoors in machine learning models. *IEEE FOCS*.
+- Xiao, H., & Devadas, S. (2023). PAC Privacy: Automatic privacy measurement and control of data processing. *CRYPTO 2023*. https://arxiv.org/abs/2210.03458
+- Shokri, R., Stronati, M., Song, C., & Shmatikov, V. (2017). Membership inference attacks against machine learning models. *IEEE Symposium on Security and Privacy (S&P)*.
 
 ---
 

@@ -17,22 +17,22 @@ Traditional methods such as data minimization, generalization, or knowledge dist
 Entropy-based methods, although common, are context-unaware. In real-world scenarios, such as loan approvals, key features like marital status or nationality may have low entropy yet remain critically important. Our hybrid approach explicitly leverages SHAP values (interpretable, model-driven importance) and Knowledge Graphs (contextual relationships) to ensure feature selection is both context-aware and practically relevant.
 
 ### **Q5: How does our method prevent data from being directly fed into ML models, and why is mere data minimization insufficient?**
-Traditional data minimization or generalization reduces granularity only after data exposure. Our proactive approach explicitly filters out irrelevant data before it reaches the ML pipeline, preventing unnecessary exposure altogether. This significantly limits privacy risks, aligning explicitly with CCPR and GDPR compliance.
+Traditional data minimization or generalization reduces granularity only after data exposure. Our proactive approach explicitly filters out irrelevant data before it reaches the ML pipeline, preventing unnecessary exposure altogether. This significantly limits privacy risks, aligning with the data minimisation principles of the GDPR and the CCPA.
 
 ### **Q6: Why address both numerical and non-numerical features, unlike the cited research paper?**
-Focusing solely on numerical data excludes substantial sensitive and categorical information essential in approximately 90% of real-world use cases. Our approach explicitly evaluates relevance using SHAP and Knowledge Graphs, ensuring comprehensive, practical privacy protections. Additionally, this prevents vulnerabilities such as undetectable backdoor attacks, a growing security concern in modern ML systems.
+Focusing solely on numerical data excludes substantial sensitive and categorical information essential in approximately 90% of real-world use cases. Our approach explicitly evaluates relevance using SHAP and Knowledge Graphs, ensuring comprehensive, practical privacy protections.
 
 ### **Q7: Why use PAC Privacy instead of Differential Privacy (DP)?**
-PAC Privacy explicitly provides theoretical guarantees by defining clear and controlled privacy leakage boundaries. DP commonly results in significant accuracy degradation due to excessive noise addition. PAC Privacy explicitly computes the minimum required noise, balancing robust privacy guarantees with minimal accuracy loss, thus providing a superior privacy-utility tradeoff.
+PAC Privacy (Xiao & Devadas, 2023) bounds how well *any* adversary can recover sensitive data, and it can automatically compute the minimum noise needed for a chosen guarantee by simulating the data-processing pipeline. DP protects against a worst-case adversary and often needs more noise, which costs accuracy. That makes PAC Privacy an attractive target for this project. Note that the current notebooks do not yet implement PAC Privacy's noise calibration: they add hand-tuned noise and report an empirical bound on one attacker's accuracy (see `theoretical_foundations/`).
 
 ### **Q8: Why is PAC Privacy more admissible than Differential Privacy?**
-Differential Privacy often assumes an overly strong attacker, leading to excessive noise addition and significant accuracy losses. PAC Privacy explicitly bounds privacy risks probabilistically, providing realistic and quantifiable privacy assurances. This makes PAC Privacy both practically effective and theoretically sound according to recent privacy research.
+Differential Privacy guarantees indistinguishability for any single record against any adversary, regardless of the data distribution, which is strong but often expensive in accuracy. PAC Privacy instead measures, for the actual data distribution, how hard it is to reconstruct sensitive data. It is weaker in the worst case but can give meaningful guarantees with much less noise. Which one is "more admissible" depends on the threat model and on what a regulator or auditor expects; DP remains the more established standard.
 
 ### **Q9: Why include Autoencoders in our approach?**
 Autoencoders effectively compress data, capturing non-linear feature interactions and reducing redundancy. Combined with adversarial training, autoencoders explicitly limit the leakage of sensitive information. This embedding step further strengthens privacy without significantly impacting model accuracy.
 
 ### **Q10: Why choose Autoencoders over Homomorphic Encryption and Federated Learning?**
-Homomorphic encryption, although secure, introduces substantial computational complexity and accuracy degradation, making it impractical for real-world applications. Federated learning, though promising, suffers from high latency and computational overhead during training. Autoencoders explicitly balance privacy protection, model accuracy, and computational efficiency, making them ideal for scalable and practical privacy-preserving machine learning.
+Homomorphic encryption protects data while it is being computed on, but it adds heavy computational cost and restricts which models can be used. Federated learning keeps raw data on users' devices, but it adds coordination and communication overhead, and model updates can still leak information. Both protect *how* data is processed; they do not reduce *what* data is used. Feature selection and autoencoders address that minimisation question directly, are cheap to run, and could be combined with either technique rather than replacing them.
 
 
 ## Experimental Context
@@ -48,36 +48,23 @@ We explored logical privacy-preserving strategies to mitigate two critical types
 - **Anonymization**: Generalization-based protection.
 - **Hybrid Method (Our Proposed Approach)**: Proposes KG+SHAP+Autoencoders+PAC.
 
-## Experimental Results
+## Illustrative Comparison (not an experimental result)
 
-### 1. Privacy vs. Utility Comparison
+> **Read this first.** The chart and ROC curves in this folder are **illustrations**, not measurements. The accuracy and attack values were typed in by hand from different notebooks and datasets (the DP figures come from Nursery, the anonymisation figures from Adult), the 88% hybrid accuracy does not match any notebook output (the Adult pipeline reaches about 81%), and the ROC curves are generated from synthetic random scores tuned to hit chosen AUC values. For measured results, see `proposed_method_implementation/` and the main README.
 
-This graph clearly illustrates how our **Hybrid Method** achieves the best balance between model accuracy and protection against inference attacks.
+![Illustrative privacy-utility comparison](image1.png)
 
-![Privacy-Utility Trade-off](image1.png)
+![Illustrative ROC curves (synthetic scores)](image2.png)
 
-- **Hybrid Method** achieved the highest predictive accuracy (**88%**) and the lowest inference attack accuracy (**58%**), clearly outperforming DP and Anonymization methods individually.
-
-### 2. ROC Curve Analysis
-
-ROC curves provide a detailed view of each method's performance against inference attacks:
-
-![ROC Curve for Inference Attacks](image2.png)
-
-- The **Hybrid Method** clearly offers the lowest ROC-AUC (**0.57**), indicating superior privacy protection compared to Differential Privacy (**0.73**) and Anonymization (**0.67**).
+A proper version of this comparison would run DP, anonymisation and the hybrid method on the **same** dataset, with the same target model and the same attack protocol, and plot ROC curves from the attacks' real scores.
 
 ## Logical Insights & Implications
 
-The logical advantage of the Hybrid Method stems from its ability to leverage strengths from both anonymization and differential privacy:
-
-- **Anonymization** effectively reduces direct linkage to individual records but struggles with retaining high utility.
-- **Differential Privacy** preserves utility better but risks higher inference vulnerability due to noise alone.
-
-By combining generalization and strategic noise addition, the Hybrid Method logically delivers improved privacy without significant compromise on data utility.
+The design argument is that anonymisation reduces linkage but costs utility, DP protects membership but spreads noise across every feature, and selecting features first means less data needs protecting at all. That argument is reasonable; demonstrating it requires the like-for-like comparison described above.
 
 ## Reproducing Results
 
-All experimental results and visualizations are documented within the Jupyter notebook (`hybrid_privacy_inference_analysis.ipynb`) in this folder, including code, extracted metrics, and detailed explanations.
+All experimental results and visualizations are documented within the Jupyter notebook (`hybrid_privacy_inference_analysis.ipynb`) in this folder, including the hand-entered values behind the illustrative chart and the synthetic-score ROC construction.
 
 ---
 
